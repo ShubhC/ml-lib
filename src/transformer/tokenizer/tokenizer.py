@@ -25,4 +25,4 @@ class Tokenizer(ABC):
         pickle.dump(self, open(path, 'wb'))
 
     def load(self, path: str):
-        self = pickle.load(open(path, 'rb'))
+        return pickle.load(open(path, 'rb'))
