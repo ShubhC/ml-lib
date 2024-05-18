@@ -64,3 +64,49 @@ class Linear(Layer):
     def backward(self, gradients):
         self._update_params(gradients)
         return self._tensor_multiply_3d( np.transpose(self.W), gradients )
+
+
+class Embedding(Layer):
+    def __init__(self, 
+                 embedding_dim: int,
+                 vocabulary_size: int,
+                 lr: int = 1e-5):
+        self.embedding_dim = embedding_dim
+        self.vocabulary_size = vocabulary_size
+
+        self.embedding_table = np.random.rand((self.vocabulary_size, 
+                                               self.embedding_dim))
+        self.lr = lr
+        
+    def forward(self, 
+                x: np.array):
+        """
+            x is numpy array of shape (indices, ) or (1, batch)
+            Does a embeddings lookup for the given indices
+        """
+        if len(x.shape) == 2:
+            assert x.shape[1] == 1
+            self.x = np.reshape(x, (-1))
+
+        return self.embedding_table[self.x]
+
+    def backward(self, 
+                 gradients: np.array):
+        """
+            gradients : numpy array of shape (embedding_dim, 1, batch_size) 
+                        Represents partial derivative of model output with respect to emb layer output
+
+            No return value as embedding layer is usually an input layer 
+        """
+        
+        # Update weights
+        # W = W - lr * dy/dW
+
+        # Gradient: (d, 1, b)
+
+        idxs, counts = np.unique(self.x, 
+                                 return_counts=True)
+
+        self.embedding_table[idxs] -= self.lr * gradients[:,:,idxs] * counts
+
+        return None
